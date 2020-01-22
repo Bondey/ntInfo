@@ -290,6 +290,8 @@ node_modules/
 # compiled shet
 *.exe
 *.pdb
+*.sys
+
 
 # Visual Studio LightSwitch build output
 **/*.HTMLClient/GeneratedArtifacts

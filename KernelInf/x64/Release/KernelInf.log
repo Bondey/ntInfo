@@ -1,7 +1,8 @@
-﻿  Source.cpp
-C:\Users\Marc\source\repos\KernelInf\KernelInf\Source.cpp(16,35): warning C4326: el tipo de valor devuelto de 'main' debe ser 'int' en lugar de 'void'
+﻿  R0Manager.cpp
+C:\Users\Marc\source\repos\KernelInf\KernelInf\R0Manager.cpp(26,12): warning C4477: 'printf_s' : la cadena de formato '%02X' requiere un argumento de tipo 'unsigned int', pero el argumento variádico 1 tiene el tipo 'char *'
+C:\Users\Marc\source\repos\KernelInf\KernelInf\R0Manager.cpp(26,12): warning C4313: 'printf_s': '%X' de la cadena de formato origina conflictos con el argumento 1 del tipo 'char *'
   Generando código
-  1 of 19 functions ( 5.3%) were compiled, the rest were copied from previous compilation.
+  4 of 20 functions (20.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada

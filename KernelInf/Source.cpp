@@ -4,7 +4,9 @@
 #include "ObManager.h"
 #include "AclManager.h"
 #include "SrvManager.h"
+#include "R0Manager.h"
 
+// insecure AF char* to wchar* 
 WCHAR* paramtow(char* param) {
 	size_t sizeofparm = 0;
 	const char* caca = param;
@@ -13,6 +15,7 @@ WCHAR* paramtow(char* param) {
 	mbstowcs_s(&sizeofparm, paramelem, 100, caca, strlen(caca));
 	return paramelem;
 }
+
 void main(int argc, char* argv[]) {
 
 	WCHAR obList[500][100];
@@ -43,6 +46,10 @@ void main(int argc, char* argv[]) {
 			if (!strcmp(argv[i], "-ss")) {
 				StartAllServices();
 				Sleep(secs*2000);
+			}
+			if (!strcmp(argv[i], "-k")) {
+				TalkToDriv();
+				return;
 			}
 		}
 
