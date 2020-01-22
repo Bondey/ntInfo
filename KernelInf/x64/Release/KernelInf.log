@@ -1,9 +1,8 @@
 ﻿  Source.cpp
-  SrvManager.cpp
 C:\Users\Marc\source\repos\KernelInf\KernelInf\Source.cpp(16,35): warning C4326: el tipo de valor devuelto de 'main' debe ser 'int' en lugar de 'void'
   Generando código
-  13 of 19 functions (68.4%) were compiled, the rest were copied from previous compilation.
-    3 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+  1 of 19 functions ( 5.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
   KernelInf.vcxproj -> C:\Users\Marc\source\repos\KernelInf\x64\Release\KernelInf.exe

@@ -30,7 +30,7 @@ void main(int argc, char* argv[]) {
 				printf_s("KernelInf.exe [flags]\n");
 				printf_s("Flags:\n");
 				printf_s("-o ObjectTypeName\tObjects to show (if not set, will be shown RootObjects)\n");
-				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n\n");
+				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n");
 				printf_s("-ss\t\t\tTry to start as much Services as posible befor checking Objects (Driver/Devices)\n\n");
 				return;
 			}
