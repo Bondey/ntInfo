@@ -10,4 +10,4 @@ Flags:
 
 -a                      Only will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'
 
--ss                     Try to start as much Services as posible befor checking Objects (Driver/Devices)
+-ss                     Try to start as much Services as posible before checking Objects (Driver/Devices)
