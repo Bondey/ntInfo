@@ -34,8 +34,9 @@ void main(int argc, char* argv[]) {
 				printf_s("KernelInf.exe [flags]\n");
 				printf_s("Flags:\n");
 				printf_s("-o ObjectTypeName\tObjects to show (if not set, will be shown RootObjects)\n");
-				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n");
-				printf_s("-ss\t\t\tTry to start as much Services as posible befor checking Objects (Driver/Devices)\n\n");
+				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n"); 
+				printf_s("-rgs\t\t\tPrint all Services and Image Paths from Registry\n"); 
+				printf_s("-ss\t\t\tTry to start as much Services as possible before checking Objects (Driver/Devices)\n\n");
 				return;
 			}
 			if (!strcmp(argv[i], "-o")) {
@@ -52,8 +53,8 @@ void main(int argc, char* argv[]) {
 				TalkToDriv();
 				return;
 			}
-			if (!strcmp(argv[i], "-rg")) {
-				listAllKeys((char*)"SYSTEM\\CurrentControlSet\\Services");
+			if (!strcmp(argv[i], "-rgs")) {
+				listServicesWithImagePath();
 				return;
 			}
 		}
