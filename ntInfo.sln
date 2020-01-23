@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KernelInf", "KernelInf\KernelInf.vcxproj", "{4405566B-9CA8-498D-A472-E95CE6CF4EE6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntinfo", "ntInfo\ntInfo.vcxproj", "{4405566B-9CA8-498D-A472-E95CE6CF4EE6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntKrnInfo", "ntKrnInfo\ntKrnInfo.vcxproj", "{57FF9A33-7FB6-467C-968A-0C72ED3FE55F}"
 EndProject

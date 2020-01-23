@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{4405566B-9CA8-498D-A472-E95CE6CF4EE6}</ProjectGuid>
-    <RootNamespace>KernelInf</RootNamespace>
+    <RootNamespace>ntInfo</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>ntInfo</ProjectName>
   </PropertyGroup>
