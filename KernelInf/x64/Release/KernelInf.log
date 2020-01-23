@@ -1,8 +1,16 @@
-﻿  RegManager.cpp
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (KernelInf.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  AclManager.cpp
+  ObManager.cpp
+  R0Manager.cpp
+C:\Users\Marc\source\repos\KernelInf\KernelInf\R0Manager.cpp(25,12): warning C4477: 'printf_s' : la cadena de formato '%02X' requiere un argumento de tipo 'unsigned int', pero el argumento variádico 1 tiene el tipo 'char *'
+  RegManager.cpp
+C:\Users\Marc\source\repos\KernelInf\KernelInf\R0Manager.cpp(25,12): warning C4313: 'printf_s': '%X' de la cadena de formato origina conflictos con el argumento 1 del tipo 'char *'
+  Source.cpp
 C:\Users\Marc\source\repos\KernelInf\KernelInf\RegManager.cpp(35,10): warning C4101: 'achValue': variable local sin referencia
+  SrvManager.cpp
+C:\Users\Marc\source\repos\KernelInf\KernelInf\Source.cpp(20,35): warning C4326: el tipo de valor devuelto de 'main' debe ser 'int' en lugar de 'void'
   Generando código
   Generación de código finalizada
-  2 of 24 functions ( 8.3%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  KernelInf.vcxproj -> C:\Users\Marc\source\repos\KernelInf\x64\Release\KernelInf.exe
+  Previous IPDB not found, fall back to full compilation.
+  All 24 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  KernelInf.vcxproj -> C:\Users\Marc\source\repos\KernelInf\x64\Release\ntInfo.exe
