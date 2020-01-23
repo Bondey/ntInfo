@@ -5,6 +5,7 @@
 #include "AclManager.h"
 #include "SrvManager.h"
 #include "R0Manager.h"
+#include "RegManager.h"
 
 // insecure AF char* to wchar* 
 WCHAR* paramtow(char* param) {
@@ -49,6 +50,10 @@ void main(int argc, char* argv[]) {
 			}
 			if (!strcmp(argv[i], "-k")) {
 				TalkToDriv();
+				return;
+			}
+			if (!strcmp(argv[i], "-rg")) {
+				listAllKeys((char*)"SYSTEM\\CurrentControlSet\\Services");
 				return;
 			}
 		}

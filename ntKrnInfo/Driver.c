@@ -9,60 +9,6 @@ const WCHAR deviceSymLinkBuffer[] = L"\\DosDevices\\ntKrnInfo";
 #define IOCTL_DEVINFO\
  CTL_CODE( SIOCTL_TYPE, 0x800, METHOD_BUFFERED, FILE_READ_DATA|FILE_WRITE_DATA)
 
-PUNICODE_STRING GetDriverfromDevice(WCHAR* DevName) {
-	UNICODE_STRING     uniName;
-	OBJECT_ATTRIBUTES  objAttr;
-
-	RtlInitUnicodeString(&uniName, L"\\\\Device\\SysmonDrv");  // or L"\\SystemRoot\\example.txt"
-	InitializeObjectAttributes(&objAttr, &uniName,
-		OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
-		NULL, NULL);
-
-	HANDLE   handle;
-	NTSTATUS ntstatus;
-	IO_STATUS_BLOCK    ioStatusBlock;
-
-	// Do not try to perform any file operations at higher IRQL levels.
-	// Instead, you may use a work item or a system worker thread to perform file operations.
-
-	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
-		return 0;
-
-	ntstatus = ZwCreateFile(&handle,
-		GENERIC_WRITE,
-		&objAttr, &ioStatusBlock, NULL,
-		FILE_ATTRIBUTE_NORMAL,
-		0,
-		FILE_OVERWRITE_IF,
-		FILE_SYNCHRONOUS_IO_NONALERT,
-		NULL, 0);
-
-	if (!NT_SUCCESS(ntstatus)) {
-		DbgPrint("ZwCreateFile failed. Status 0x%x", ntstatus);
-		return 0;
-	}
-
-	PVOID* DevObject = NULL;
-
-	ntstatus = ObReferenceObjectByHandle(handle,
-		0,
-		NULL,
-		KernelMode,
-		DevObject,
-		NULL);
-
-	if (!NT_SUCCESS(ntstatus)) {
-		DbgPrint("ObReferenceObjectByHandle failed. Status 0x%x", ntstatus);
-		ZwClose(handle);
-		return 0;
-	}
-
-	PDRIVER_OBJECT DrvObject = (PDRIVER_OBJECT)((ULONG_PTR)DevObject + 0x008);
-
-	PUNICODE_STRING DrvName = (PUNICODE_STRING)((ULONG_PTR)DrvObject + 0x038);
-
-	return DrvName;
-}
 
 void supLog(const char* format, ...) {
 	UNICODE_STRING     uniName;
@@ -105,6 +51,62 @@ void supLog(const char* format, ...) {
 	}
 }
 
+
+UNICODE_STRING GetDriverfromDevice(WCHAR* DevName) {
+	UNICODE_STRING     uniName;
+	OBJECT_ATTRIBUTES  objAttr;
+
+	RtlInitUnicodeString(&uniName, L"\\\\Device\\SysmonDrv");  // or L"\\SystemRoot\\example.txt"
+	InitializeObjectAttributes(&objAttr, &uniName,
+		OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
+		NULL, NULL);
+
+	HANDLE   handle;
+	NTSTATUS ntstatus;
+	IO_STATUS_BLOCK    ioStatusBlock;
+
+	// Do not try to perform any file operations at higher IRQL levels.
+	// Instead, you may use a work item or a system worker thread to perform file operations.
+	PUNICODE_STRING err = NULL;
+	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
+		return *err;
+
+	ntstatus = ZwCreateFile(&handle,
+		GENERIC_WRITE,
+		&objAttr, &ioStatusBlock, NULL,
+		FILE_ATTRIBUTE_NORMAL,
+		0,
+		FILE_OVERWRITE_IF,
+		FILE_SYNCHRONOUS_IO_NONALERT,
+		NULL, 0);
+
+	if (!NT_SUCCESS(ntstatus)) {
+		supLog("ZwCreateFile failed. Status 0x%x", ntstatus);
+		return *err;
+	}
+
+	PVOID* DevObject = NULL;
+
+	ntstatus = ObReferenceObjectByHandle(handle,
+		0,
+		NULL,
+		KernelMode,
+		DevObject,
+		NULL);
+
+	if (!NT_SUCCESS(ntstatus)) {
+		supLog("ObReferenceObjectByHandle failed. Status 0x%x", ntstatus);
+		ZwClose(handle);
+		return *err;
+	}
+
+	PDRIVER_OBJECT DrvObject = ((PDEVICE_OBJECT)DevObject)->DriverObject;
+
+	UNICODE_STRING DrvName = DrvObject->DriverName;
+
+	return DrvName;
+}
+
 VOID OnUnload(IN PDRIVER_OBJECT pDriverObject)
 {
 	UNICODE_STRING symLink;
@@ -144,15 +146,24 @@ NTSTATUS Function_IRP_DEVICE_CONTROL(PDEVICE_OBJECT pDeviceObject, PIRP Irp)
 	PVOID pBuf = Irp->AssociatedIrp.SystemBuffer;
 
 	pIoStackLocation = IoGetCurrentIrpStackLocation(Irp);
+	
+
 	switch (pIoStackLocation->Parameters.DeviceIoControl.IoControlCode)
 	{
 		case IOCTL_DEVINFO:
 			supLog("IOCTL DEVINFO Called\n");
 
-			PUNICODE_STRING res = GetDriverfromDevice(pBuf);
+			UNICODE_STRING res = GetDriverfromDevice(pBuf);
+			ANSI_STRING DestString;
+			DestString.Buffer = (PCHAR)ExAllocatePool(NonPagedPool, res.Length+1);
+			DestString.Length = 0;
+
+			RtlUnicodeStringToAnsiString(&DestString, &res, TRUE);
+
 			supLog("IOCTL DEVINFO Called\n");
-			RtlZeroMemory(pBuf, pIoStackLocation->Parameters.DeviceIoControl.InputBufferLength);
-			RtlCopyMemory(pBuf, res, pIoStackLocation->Parameters.DeviceIoControl.InputBufferLength);
+			ULONG len = pIoStackLocation->Parameters.DeviceIoControl.InputBufferLength;
+			RtlZeroMemory(pBuf, len);
+			//RtlCopyMemory(pBuf, DestString.Buffer, DestString.Length);
 
 			break;
 
@@ -161,7 +172,7 @@ NTSTATUS Function_IRP_DEVICE_CONTROL(PDEVICE_OBJECT pDeviceObject, PIRP Irp)
 	// Finish the I/O operation by simply completing the packet and returning
 	// the same status as in the packet itself.
 	Irp->IoStatus.Status = STATUS_SUCCESS;
-	Irp->IoStatus.Information = strlen(welcome);
+	Irp->IoStatus.Information = 511;
 	IoCompleteRequest(Irp, IO_NO_INCREMENT);
 
 	return STATUS_SUCCESS;

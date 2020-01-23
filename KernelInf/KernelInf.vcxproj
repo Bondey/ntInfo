@@ -128,11 +128,13 @@
     <ClCompile Include="AclManager.cpp" />
     <ClCompile Include="ObManager.cpp" />
     <ClCompile Include="R0Manager.cpp" />
+    <ClCompile Include="RegManager.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="SrvManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AclManager.h" />
+    <ClInclude Include="RegManager.h" />
     <ClInclude Include="ObManager.h" />
     <ClInclude Include="R0Manager.h" />
     <ClInclude Include="SrvManager.h" />
