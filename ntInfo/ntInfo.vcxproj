@@ -127,6 +127,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AclManager.cpp" />
+    <ClCompile Include="IRPManager.cpp" />
     <ClCompile Include="ObManager.cpp" />
     <ClCompile Include="R0Manager.cpp" />
     <ClCompile Include="RegManager.cpp" />
@@ -135,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AclManager.h" />
+    <ClInclude Include="IRPManager.h" />
     <ClInclude Include="RegManager.h" />
     <ClInclude Include="ObManager.h" />
     <ClInclude Include="R0Manager.h" />
