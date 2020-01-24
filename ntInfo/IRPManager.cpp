@@ -43,6 +43,8 @@ int sendIOCtl( char* device, char* IOCTL_FILE, char* fileInPath, char* fileOutPa
 	char OutBuff[0xFFFF];
 	size_t OutLen=0xFFFF;
 
+	printf("Sent IOCTL: %x With Inbuff Size %i\n",IOCTL_CODE,inLen);
+
 	DeviceIoControl(DevHandler, IOCTL_CODE, inBuff, inLen, OutBuff, OutLen, &returned, NULL);
 
 	if (returned > 0){

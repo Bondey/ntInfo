@@ -6,6 +6,7 @@
 #include "SrvManager.h"
 #include "R0Manager.h"
 #include "RegManager.h"
+#include "IRPManager.h"
 
 // insecure AF char* to wchar* 
 WCHAR* paramtow(char* param) {
@@ -36,6 +37,9 @@ void main(int argc, char* argv[]) {
 				printf_s("-o ObjectTypeName\tObjects to show (if not set, will be shown RootObjects)\n");
 				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n"); 
 				printf_s("-rgs\t\t\tPrint all Services and Image Paths from Registry\n"); 
+				printf_s("-ioctl DeviceName FileIOCTL FileInBuff FileOutBuff\n");
+				printf_s("\t\t\tSends an IOCTL to [DeviceName], and reads a DWORD from FileIOCTL as IOCTL_CODE, a Input Buffer\n");
+				printf_s("\t\t\tfrom [FileInBuff] and writes result on [FileOutbuff]\n");
 				printf_s("-ss\t\t\tTry to start as much Services as possible before checking Objects (Driver/Devices)\n\n");
 				return;
 			}
@@ -57,9 +61,15 @@ void main(int argc, char* argv[]) {
 				listServicesWithImagePath();
 				return;
 			}
+			if (!strcmp(argv[i], "-ioctl")) {
+				sendIOCtl(argv[i+1], argv[i+2], argv[i+3], argv[i+4]);
+				return;
+			}
 		}
 
 	}
+
+	
 	
 	total = getObElems(elem, obList);
 	for (int i = 0; i < total; i++) {
