@@ -10,6 +10,13 @@ const WCHAR deviceSymLinkBuffer[] = L"\\DosDevices\\ntKrnInfo";
 #define IOCTL_DEVINFO\
  CTL_CODE( SIOCTL_TYPE, 0x800, METHOD_BUFFERED, FILE_READ_DATA|FILE_WRITE_DATA)
 
+typedef struct _DRIVER_INFO
+{
+	PVOID DriverStart;
+	ULONG DriverSize;
+	char DriverName[150];
+	PVOID IOCTLOFFSET[28];
+} DRIVER_INFO, * PDRIVER_INFO;
 
 void supLog(const char* format, ...) {
 	UNICODE_STRING     uniName;
@@ -53,30 +60,45 @@ void supLog(const char* format, ...) {
 }
 
 
-UNICODE_STRING GetDriverfromDevice(WCHAR* DevName) {
+DRIVER_INFO GetDriverfromDevice(WCHAR* DevName) {
 	UNICODE_STRING uniName;
-
+	DRIVER_INFO Drvinfo;
 	FILE_OBJECT* keybdfo;
 	DEVICE_OBJECT* keybddo;
 	NTSTATUS status;
 	
-	RtlInitUnicodeString(&uniName, L"\\Device\\WMIDataDevice");  // or L"\\SystemRoot\\example.txt"
+	RtlInitUnicodeString(&uniName, L"\\Device\\gpuenergydrv");  // or L"\\SystemRoot\\example.txt"
 	status = IoGetDeviceObjectPointer(&uniName, FILE_READ_DATA, &keybdfo, &keybddo);
 
 	if (!NT_SUCCESS(status)) {
 		supLog("nt Status %x\n", status);
-		return uniName;
+		return Drvinfo;
 	}
 	PDRIVER_OBJECT DrvObject = keybddo->DriverObject;
 	UNICODE_STRING DrvName = DrvObject->DriverName;
+
+	// Get Driver In-Memmory boundaries in order to check if dispatch functions are inside de driver or at other part..
+	Drvinfo.DriverStart = DrvObject->DriverStart;
+	Drvinfo.DriverSize = DrvObject->DriverSize;
+
+	// Strings are hard in c brah...
+	ANSI_STRING ADST;
+	ADST.Buffer = (PCHAR)ExAllocatePool(NonPagedPool, DrvName.Length + 1);
+	ADST.Length = 0;
+	RtlUnicodeStringToAnsiString(&ADST, &DrvName, TRUE);
+	int i = 0;
+	for (i = 0; i < ADST.Length; i++) {
+		Drvinfo.DriverName[i] = ADST.Buffer[i];
+	}
+	Drvinfo.DriverName[i + 1] = '\x0';
+
+
+	for (int i = 0; i < 28; i++) {
+		Drvinfo.IOCTLOFFSET[i] = DrvObject->MajorFunction[i];
+	}
 	
-	//PDRIVER_DISPATCH DDisp = DrvObject->MajorFunction;
-	//supLog("nt Status %llllx\n", DDisp);
-
-
 	ObDereferenceObject(keybdfo);
-	return DrvName;
-	
+	return Drvinfo;
 }
 
 VOID OnUnload(IN PDRIVER_OBJECT pDriverObject)
@@ -122,20 +144,13 @@ NTSTATUS Function_IRP_DEVICE_CONTROL(PDEVICE_OBJECT pDeviceObject, PIRP Irp)
 
 	switch (pIoStackLocation->Parameters.DeviceIoControl.IoControlCode)
 	{
-
 		case IOCTL_DEVINFO:
-			ANSI_STRING DestString;
-			UNICODE_STRING res = GetDriverfromDevice(pBuf);
-			DestString.Buffer = (PCHAR)ExAllocatePool(NonPagedPool, res.Length+1);
-			DestString.Length = 0;
-
-			RtlUnicodeStringToAnsiString(&DestString, &res, TRUE);
+			DRIVER_INFO Drvinfo = GetDriverfromDevice(pBuf);
+			supLog("Info: %s\n", Drvinfo.DriverName);
 
 			ULONG len = pIoStackLocation->Parameters.DeviceIoControl.InputBufferLength;
 			RtlZeroMemory(pBuf, len);
-			supLog("IOCTL DEVINFO %s \n", DestString.Buffer);
-			RtlCopyMemory(pBuf, DestString.Buffer, DestString.Length);
-
+			RtlCopyMemory(pBuf, &Drvinfo, sizeof(Drvinfo));
 			break;
 	}
 

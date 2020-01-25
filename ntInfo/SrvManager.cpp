@@ -25,6 +25,76 @@ int startSVC(char* svcname) {
 	else printf("Service start pending...\n");
 	return 0;
 }
+
+VOID SvcDelete(char* svcname)
+{
+	SC_HANDLE schSCManager;
+	SC_HANDLE schService;
+
+	// Get a handle to the SCM database. 
+	schSCManager = OpenSCManager(
+		NULL,                    // local computer
+		NULL,                    // ServicesActive database 
+		SC_MANAGER_ALL_ACCESS);  // full access rights 
+
+	if (NULL == schSCManager)
+	{
+		printf("OpenSCManager failed (%d)\n", GetLastError());
+		return;
+	}
+
+	schService = OpenService(
+		schSCManager,         // SCM database 
+		svcname,            // name of service 
+		SERVICE_START);  // full access 
+
+	DeleteService(schService);
+}
+
+VOID SvcInstall(char* svcname, char* svcpath)
+{
+	SC_HANDLE schSCManager;
+	SC_HANDLE schService;
+
+	// Get a handle to the SCM database. 
+	schSCManager = OpenSCManager(
+		NULL,                    // local computer
+		NULL,                    // ServicesActive database 
+		SC_MANAGER_ALL_ACCESS);  // full access rights 
+
+	if (NULL == schSCManager)
+	{
+		printf("OpenSCManager failed (%d)\n", GetLastError());
+		return;
+	}
+
+	// Create the service
+	schService = CreateService(
+		schSCManager,              // SCM database 
+		svcname,                   // name of service 
+		svcname,                   // service name to display 
+		SERVICE_ALL_ACCESS,        // desired access 
+		SERVICE_KERNEL_DRIVER,     // service type 
+		SERVICE_DEMAND_START,      // start type 
+		SERVICE_ERROR_NORMAL,      // error control type 
+		svcpath,                    // path to service's binary 
+		NULL,                      // no load ordering group 
+		NULL,                      // no tag identifier 
+		NULL,                      // no dependencies 
+		NULL,                      // LocalSystem account 
+		NULL);                     // no password 
+
+	if (schService == NULL)
+	{
+		printf("CreateService failed (%d)\n", GetLastError());
+		CloseServiceHandle(schSCManager);
+		return;
+	}
+	else printf("Service installed successfully\n");
+	CloseServiceHandle(schService);
+	CloseServiceHandle(schSCManager);
+}
+
 int StartAllServices() {
 	SC_HANDLE hSCM;
 	hSCM = OpenSCManager(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);

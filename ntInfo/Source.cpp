@@ -53,6 +53,14 @@ void main(int argc, char* argv[]) {
 				StartAllServices();
 				Sleep(secs*2000);
 			}
+			if (!strcmp(argv[i], "-ik")) {
+				SvcInstall((char*)"ntKrnInfo", (char*)"C:\\Users\\lucas\\Desktop\\patata\\ntKrnInfo.sys");
+				return;
+			}
+			if (!strcmp(argv[i], "-dk")) {
+				SvcDelete((char*)"ntKrnInfo");
+				return;
+			}
 			if (!strcmp(argv[i], "-k")) {
 				TalkToDriv();
 				return;
