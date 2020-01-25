@@ -1,5 +1,6 @@
 #include <ntddk.h>
 #include "ntstrsafe.h"
+#include "Driver.h"
 
 PDEVICE_OBJECT g_MyDevice; // Global pointer to our device object
 const WCHAR deviceNameBuffer[] = L"\\Device\\ntKrnInfo";
@@ -53,58 +54,29 @@ void supLog(const char* format, ...) {
 
 
 UNICODE_STRING GetDriverfromDevice(WCHAR* DevName) {
-	UNICODE_STRING     uniName;
-	OBJECT_ATTRIBUTES  objAttr;
+	UNICODE_STRING uniName;
 
-	RtlInitUnicodeString(&uniName, L"\\\\Device\\SysmonDrv");  // or L"\\SystemRoot\\example.txt"
-	InitializeObjectAttributes(&objAttr, &uniName,
-		OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
-		NULL, NULL);
+	FILE_OBJECT* keybdfo;
+	DEVICE_OBJECT* keybddo;
+	NTSTATUS status;
+	
+	RtlInitUnicodeString(&uniName, L"\\Device\\WMIDataDevice");  // or L"\\SystemRoot\\example.txt"
+	status = IoGetDeviceObjectPointer(&uniName, FILE_READ_DATA, &keybdfo, &keybddo);
 
-	HANDLE   handle;
-	NTSTATUS ntstatus;
-	IO_STATUS_BLOCK    ioStatusBlock;
-
-	// Do not try to perform any file operations at higher IRQL levels.
-	// Instead, you may use a work item or a system worker thread to perform file operations.
-	PUNICODE_STRING err = NULL;
-	if (KeGetCurrentIrql() != PASSIVE_LEVEL)
-		return *err;
-
-	ntstatus = ZwCreateFile(&handle,
-		GENERIC_WRITE,
-		&objAttr, &ioStatusBlock, NULL,
-		FILE_ATTRIBUTE_NORMAL,
-		0,
-		FILE_OVERWRITE_IF,
-		FILE_SYNCHRONOUS_IO_NONALERT,
-		NULL, 0);
-
-	if (!NT_SUCCESS(ntstatus)) {
-		supLog("ZwCreateFile failed. Status 0x%x", ntstatus);
-		return *err;
+	if (!NT_SUCCESS(status)) {
+		supLog("nt Status %x\n", status);
+		return uniName;
 	}
-
-	PVOID* DevObject = NULL;
-
-	ntstatus = ObReferenceObjectByHandle(handle,
-		0,
-		NULL,
-		KernelMode,
-		DevObject,
-		NULL);
-
-	if (!NT_SUCCESS(ntstatus)) {
-		supLog("ObReferenceObjectByHandle failed. Status 0x%x", ntstatus);
-		ZwClose(handle);
-		return *err;
-	}
-
-	PDRIVER_OBJECT DrvObject = ((PDEVICE_OBJECT)DevObject)->DriverObject;
-
+	PDRIVER_OBJECT DrvObject = keybddo->DriverObject;
 	UNICODE_STRING DrvName = DrvObject->DriverName;
+	
+	//PDRIVER_DISPATCH DDisp = DrvObject->MajorFunction;
+	//supLog("nt Status %llllx\n", DDisp);
 
+
+	ObDereferenceObject(keybdfo);
 	return DrvName;
+	
 }
 
 VOID OnUnload(IN PDRIVER_OBJECT pDriverObject)
@@ -150,23 +122,21 @@ NTSTATUS Function_IRP_DEVICE_CONTROL(PDEVICE_OBJECT pDeviceObject, PIRP Irp)
 
 	switch (pIoStackLocation->Parameters.DeviceIoControl.IoControlCode)
 	{
-		case IOCTL_DEVINFO:
-			supLog("IOCTL DEVINFO Called\n");
 
-			UNICODE_STRING res = GetDriverfromDevice(pBuf);
+		case IOCTL_DEVINFO:
 			ANSI_STRING DestString;
+			UNICODE_STRING res = GetDriverfromDevice(pBuf);
 			DestString.Buffer = (PCHAR)ExAllocatePool(NonPagedPool, res.Length+1);
 			DestString.Length = 0;
 
 			RtlUnicodeStringToAnsiString(&DestString, &res, TRUE);
 
-			supLog("IOCTL DEVINFO Called\n");
 			ULONG len = pIoStackLocation->Parameters.DeviceIoControl.InputBufferLength;
 			RtlZeroMemory(pBuf, len);
-			//RtlCopyMemory(pBuf, DestString.Buffer, DestString.Length);
+			supLog("IOCTL DEVINFO %s \n", DestString.Buffer);
+			RtlCopyMemory(pBuf, DestString.Buffer, DestString.Length);
 
 			break;
-
 	}
 
 	// Finish the I/O operation by simply completing the packet and returning

@@ -21,10 +21,8 @@ int TalkToDriv() {
 
 	DeviceIoControl(hDevice, IOCTL_DEVINFO, InBuff, 20*sizeof(WCHAR), ReadBuffer, sizeof(ReadBuffer), &dwBytesRead, NULL);
 	
-	for (int j = 0; j < 50; j++){
-		printf_s("%02X", ReadBuffer[j]);
-		j++;
-	}
+	printf_s("%s", ReadBuffer);
+	
 
 	CloseHandle(hDevice);
 	return 1;
