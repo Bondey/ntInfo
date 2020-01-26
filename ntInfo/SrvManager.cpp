@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 
-int startSVC(char* svcname) {
+int SvcStart(char* svcname) {
 	SC_HANDLE hSCM;
 	hSCM = OpenSCManager(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
 	if (!hSCM) {
@@ -46,7 +46,7 @@ VOID SvcDelete(char* svcname)
 	schService = OpenService(
 		schSCManager,         // SCM database 
 		svcname,            // name of service 
-		SERVICE_START);  // full access 
+		SERVICE_ALL_ACCESS);  // full access 
 
 	DeleteService(schService);
 }
@@ -95,6 +95,102 @@ VOID SvcInstall(char* svcname, char* svcpath)
 	CloseServiceHandle(schSCManager);
 }
 
+VOID __stdcall SvcStop(char* szSvcName)
+{
+	SERVICE_STATUS_PROCESS ssp;
+	DWORD dwStartTime = GetTickCount();
+	DWORD dwBytesNeeded;
+	DWORD dwTimeout = 10000; // 30-second time-out
+	DWORD dwWaitTime;
+	SC_HANDLE schSCManager;
+	SC_HANDLE schService;
+
+	// Get a handle to the SCM database. 
+
+	schSCManager = OpenSCManager(
+		NULL,                    // local computer
+		NULL,                    // ServicesActive database 
+		SC_MANAGER_ALL_ACCESS);  // full access rights 
+
+	if (NULL == schSCManager)
+	{
+		printf("OpenSCManager failed (%d)\n", GetLastError());
+		return;
+	}
+
+	// Get a handle to the service.
+
+	schService = OpenService(
+		schSCManager,         // SCM database 
+		szSvcName,            // name of service 
+		SERVICE_ALL_ACCESS);
+
+	if (schService == NULL)
+	{
+		printf("OpenService failed (%d)\n", GetLastError());
+		CloseServiceHandle(schSCManager);
+		return;
+	}
+
+	// Wait for the service to stop.
+	// Make sure the service is not already stopped.
+
+	if (!QueryServiceStatusEx(
+		schService,
+		SC_STATUS_PROCESS_INFO,
+		(LPBYTE)&ssp,
+		sizeof(SERVICE_STATUS_PROCESS),
+		&dwBytesNeeded))
+	{
+		printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
+		goto stop_cleanup;
+	}
+
+	if (ssp.dwCurrentState == SERVICE_STOPPED)
+	{
+		printf("Service is already stopped.\n");
+		goto stop_cleanup;
+	}
+
+	if (!ControlService(
+		schService,
+		SERVICE_CONTROL_STOP,
+		(LPSERVICE_STATUS)&ssp))
+	{
+		printf("ControlService failed (%d)\n", GetLastError());
+		goto stop_cleanup;
+	}
+
+	while (ssp.dwCurrentState != SERVICE_STOPPED)
+	{
+		Sleep(ssp.dwWaitHint);
+		if (!QueryServiceStatusEx(
+			schService,
+			SC_STATUS_PROCESS_INFO,
+			(LPBYTE)&ssp,
+			sizeof(SERVICE_STATUS_PROCESS),
+			&dwBytesNeeded))
+		{
+			printf("QueryServiceStatusEx failed (%d)\n", GetLastError());
+			goto stop_cleanup;
+		}
+
+		if (ssp.dwCurrentState == SERVICE_STOPPED)
+			break;
+
+		if (GetTickCount() - dwStartTime > dwTimeout)
+		{
+			printf("Wait timed out\n");
+			goto stop_cleanup;
+		}
+	}
+	printf("Service stopped successfully\n");
+
+stop_cleanup:
+	CloseServiceHandle(schService);
+	CloseServiceHandle(schSCManager);
+}
+
 int StartAllServices() {
 	SC_HANDLE hSCM;
 	hSCM = OpenSCManager(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
@@ -128,7 +224,7 @@ int StartAllServices() {
 					//	break;
 				case 1:
 					//printf_s("Status: SERVICE_STOPPED\n");
-					if (startSVC(services[i].lpServiceName) == 0) {
+					if (SvcStart(services[i].lpServiceName) == 0) {
 						svccont++;
 					}
 					break;

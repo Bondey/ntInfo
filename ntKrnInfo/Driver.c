@@ -67,7 +67,7 @@ DRIVER_INFO GetDriverfromDevice(WCHAR* DevName) {
 	DEVICE_OBJECT* keybddo;
 	NTSTATUS status;
 	
-	RtlInitUnicodeString(&uniName, L"\\Device\\gpuenergydrv");  // or L"\\SystemRoot\\example.txt"
+	RtlInitUnicodeString(&uniName, DevName);  // or L"\\SystemRoot\\example.txt"
 	status = IoGetDeviceObjectPointer(&uniName, FILE_READ_DATA, &keybdfo, &keybddo);
 
 	if (!NT_SUCCESS(status)) {

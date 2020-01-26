@@ -1,2 +1,2 @@
 #pragma once
-int TalkToDriv();
+int TalkToDriv(char* InBuff);

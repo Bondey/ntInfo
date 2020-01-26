@@ -26,10 +26,16 @@ typedef struct _DRIVER_INFO
 	PVOID IOCTLOFFSET[28];
 } DRIVER_INFO, * PDRIVER_INFO;
 
-int TalkToDriv() {
+
+int TalkToDriv(char* InBuff) {
 	 
 	HANDLE hDevice;
-	WCHAR InBuff[20] = L"\\Device\\SysmonDrv";
+	// char* to WCHAR
+	size_t cSize = strlen(InBuff) + 1;
+	wchar_t* wc = new wchar_t[cSize];
+	mbstowcs_s(&cSize, wc, cSize, (const char*)InBuff, cSize);
+	wprintf_s(L"getting dev: %s\n",wc);
+
 	DWORD dwBytesRead = 0;
 	char* ReadBuffer[1000];
 
@@ -40,7 +46,7 @@ int TalkToDriv() {
 		return 0;
 	}
 
-	DeviceIoControl(hDevice, IOCTL_DEVINFO, InBuff, 20*sizeof(WCHAR), ReadBuffer, 1000, &dwBytesRead, NULL);
+	DeviceIoControl(hDevice, IOCTL_DEVINFO, wc, cSize*sizeof(WCHAR), ReadBuffer, 1000, &dwBytesRead, NULL);
 
 	PDRIVER_INFO Drvinfo = reinterpret_cast<DRIVER_INFO*>(ReadBuffer);
 	

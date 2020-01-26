@@ -33,14 +33,17 @@ void main(int argc, char* argv[]) {
 			if (!strcmp(argv[i], "-h")) {
 				printf_s("USAGE:\n");
 				printf_s("KernelInf.exe [flags]\n");
-				printf_s("Flags:\n");
-				printf_s("-o ObjectTypeName\tObjects to show (if not set, will be shown RootObjects)\n");
-				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n"); 
-				printf_s("-rgs\t\t\tPrint all Services and Image Paths from Registry\n"); 
+				printf_s("Flags:\n\n");
+				printf_s("-o ObjectTypeName\tObjects to show (if not set, will be shown RootObjects)\n\n");
+				printf_s("-a\t\t\tOnly will show objects which ACL leaves privs for 'AllUsers' or 'LoggedUser'\n\n"); 
+				printf_s("-rgs\t\t\tPrint all Services and Image Paths from Registry\n\n"); 
+				printf_s("-ik\t\t\tInstall and start ntInfo Kernel Driver (unsigned)\n\n");
+				printf_s("-dk\t\t\tStop and delete ntInfo Kernel Driver\n\n");
+				printf_s("-k DeviceObject\t\tPrints Driver object and IRP handlers for this device\n\n");
+				printf_s("-ss\t\t\tTry to start as much Services as possible before checking Objects (Driver/Devices)\n\n");
 				printf_s("-ioctl DeviceName FileIOCTL FileInBuff FileOutBuff\n");
 				printf_s("\t\t\tSends an IOCTL to [DeviceName], and reads a DWORD from FileIOCTL as IOCTL_CODE, a Input Buffer\n");
-				printf_s("\t\t\tfrom [FileInBuff] and writes result on [FileOutbuff]\n");
-				printf_s("-ss\t\t\tTry to start as much Services as possible before checking Objects (Driver/Devices)\n\n");
+				printf_s("\t\t\tfrom [FileInBuff] and writes result on [FileOutbuff]\n\n");
 				return;
 			}
 			if (!strcmp(argv[i], "-o")) {
@@ -55,14 +58,18 @@ void main(int argc, char* argv[]) {
 			}
 			if (!strcmp(argv[i], "-ik")) {
 				SvcInstall((char*)"ntKrnInfo", (char*)"C:\\Users\\lucas\\Desktop\\patata\\ntKrnInfo.sys");
+				Sleep(1000);
+				SvcStart((char*)"ntKrnInfo");
 				return;
 			}
 			if (!strcmp(argv[i], "-dk")) {
+				SvcStop((char*)"ntKrnInfo");
+				Sleep(1000);
 				SvcDelete((char*)"ntKrnInfo");
 				return;
 			}
 			if (!strcmp(argv[i], "-k")) {
-				TalkToDriv();
+				TalkToDriv(argv[i+1]);
 				return;
 			}
 			if (!strcmp(argv[i], "-rgs")) {
