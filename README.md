@@ -24,3 +24,7 @@ Flags:
 -ioctl DeviceName FileIOCTL FileInBuff FileOutBuff
                         Sends an IOCTL to [DeviceName], and reads a DWORD from FileIOCTL as IOCTL_CODE, 
                         a Input Buffer from [FileInBuff] and writes result on [FileOutbuff]            
+
+# FAQ
+¿Trying to read my code? sry...:
+![Image of devel](https://github.com/Bondey/ntinfo/blob/master/misc/devel.jpg)
